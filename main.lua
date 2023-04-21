@@ -18,6 +18,8 @@ KResetDelay=1000 --milliseconds
 KLeftPaddleX=48
 KRightPaddleX=352
 
+ImUsingTiltControls = false
+
 function Setup()
     GameState = KGameOverState
     gfx.setColor(gfx.kColorBlack)
@@ -42,7 +44,6 @@ function ResetGame()
     LeftScore:setScore(0)
     RightScore:setScore(0)
     GameState = KPlayState
-    printTable(leftPaddle)
     leftPaddle:addSprite()
     rightPaddle:addSprite()
     ResetPoint()
@@ -51,9 +52,7 @@ end
 function ScoreRight()
     RightScore:setScore(RightScore.score + 1)
     if (RightScore.score >= KMaxScore) then
-        GameState = KGameOverState
-        leftPaddle:removeSprite()
-        rightPaddle:removeSprite()
+        GameOver()
     else
         ResetPoint()
     end
@@ -62,9 +61,7 @@ end
 function ScoreLeft()
     LeftScore:setScore(LeftScore.score + 1)
     if (LeftScore.score >= KMaxScore) then
-        GameState = KGameOverState
-        leftPaddle:removeSprite()
-        rightPaddle:removeSprite()
+        GameOver()
     else
         ResetPoint()
     end
@@ -77,22 +74,47 @@ function ResetPoint()
 end
 
 function GetLeftInput()
-    if (playdate.buttonIsPressed(playdate.kButtonUp)) then
-        leftPaddle.yControl -= 0.1
+    if ImUsingTiltControls then
+        local aX, aY, aZ = playdate.readAccelerometer()
+        leftPaddle.yControl = aY * 2
         if leftPaddle.yControl < -1 then
             leftPaddle.yControl = -1
-        end
-        print (leftPaddle.yControl)
-    elseif playdate.buttonIsPressed(playdate.kButtonDown) then
-        leftPaddle.yControl += 0.1
-        if leftPaddle.yControl > 1 then
+        elseif leftPaddle.yControl > 1 then
             leftPaddle.yControl = 1
         end
-        print (leftPaddle.yControl)
+    else
+        if (playdate.buttonIsPressed(playdate.kButtonUp)) then
+            leftPaddle.yControl -= 0.1
+            if leftPaddle.yControl < -1 then
+                leftPaddle.yControl = -1
+            end
+        elseif playdate.buttonIsPressed(playdate.kButtonDown) then
+            leftPaddle.yControl += 0.1
+            if leftPaddle.yControl > 1 then
+                leftPaddle.yControl = 1
+            end
+        end
     end
 end
 
+function GameOver()
+    GameState = KGameOverState
+    playdate.stopAccelerometer()
+    leftPaddle:removeSprite()
+    rightPaddle:removeSprite()
+end
+
+
 function GetRightInput()
+    local crankDeg = playdate.getCrankPosition()
+    if (crankDeg > 180) then
+        crankDeg = 360 - crankDeg -- mirror front and back
+    end
+    local offset = crankDeg / 90
+    offset -= 1 --range from -1 to 1, up to down
+    rightPaddle.yControl = offset
+
+    --consider doing sin(crankDeg) instead?
 end
 
 function playdate.update()
@@ -103,6 +125,12 @@ function playdate.update()
 
     playdate.graphics.sprite.update()
     if (playdate.buttonIsPressed(playdate.kButtonA) and GameState == KGameOverState) then
+        ImUsingTiltControls = false
+        ResetGame()
+    end
+    if (playdate.buttonIsPressed(playdate.kButtonB) and GameState == KGameOverState) then
+        ImUsingTiltControls = true
+        playdate.startAccelerometer()
         ResetGame()
     end
     playdate.timer.updateTimers()

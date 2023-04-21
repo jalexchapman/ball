@@ -1,2 +1,9 @@
+name=Quickie Pong
+author=Alex Chapman
+description=A basic Pong.
+bundleID=io.github.jalexchapman.quickiepong
+version=1.0
+buildNumber=100
+imagePath=SystemAssets
 pdxversion=11200
-buildtime=735362252
+buildtime=735366676
