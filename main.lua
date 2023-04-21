@@ -76,22 +76,32 @@ end
 function GetLeftInput()
     if ImUsingTiltControls then
         local aX, aY, aZ = playdate.readAccelerometer()
-        leftPaddle.yControl = aY * 2
-        if leftPaddle.yControl < -1 then
-            leftPaddle.yControl = -1
-        elseif leftPaddle.yControl > 1 then
-            leftPaddle.yControl = 1
-        end
+        aY = math.min(1, aY)
+        aY = math.max(-1, aY)
+        aZ = math.min(1, aZ)
+        aZ = math.max(-1, aZ)
+        local rY = math.asin(aY)
+        local rotSign = rY > 0 and 1 or -1
+        local rZ = math.acos(aZ) * rotSign
+        local rot = (rY + rZ) / 2
+        -- print(rY, "|", rZ, " : ", rot)
+
+        local newControl = rY * 1.67
+        --local newControl = aY * 2
+        leftPaddle.yControl = (leftPaddle.yControl + newControl) / 2 --avg for dejitter
+
     else
         if (playdate.buttonIsPressed(playdate.kButtonUp)) then
-            leftPaddle.yControl -= 0.1
-            if leftPaddle.yControl < -1 then
-                leftPaddle.yControl = -1
+            if playdate.buttonIsPressed(playdate.kButtonLeft) then
+                leftPaddle.yControl -= 0.04
+            else
+                leftPaddle.yControl -= 0.1
             end
         elseif playdate.buttonIsPressed(playdate.kButtonDown) then
-            leftPaddle.yControl += 0.1
-            if leftPaddle.yControl > 1 then
-                leftPaddle.yControl = 1
+            if playdate.buttonIsPressed(playdate.kButtonLeft) then
+                leftPaddle.yControl += 0.04
+            else
+                leftPaddle.yControl += 0.1
             end
         end
     end
@@ -107,14 +117,7 @@ end
 
 function GetRightInput()
     local crankDeg = playdate.getCrankPosition()
-    if (crankDeg > 180) then
-        crankDeg = 360 - crankDeg -- mirror front and back
-    end
-    local offset = crankDeg / 90
-    offset -= 1 --range from -1 to 1, up to down
-    rightPaddle.yControl = offset
-
-    --consider doing sin(crankDeg) instead?
+    rightPaddle.yControl = -1 * math.cos(math.rad(crankDeg))
 end
 
 function playdate.update()

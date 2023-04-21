@@ -31,5 +31,7 @@ function Paddle:draw(x, y, width, height)
 end
 
 function Paddle:update()
+    self.yControl = math.min(self.yControl, 1)
+    self.yControl = math.max(self.yControl, -1)
     self:moveTo(self.x, self.yControl * self.halfRange + self.centerY)
 end
