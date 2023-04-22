@@ -1,9 +1,0 @@
-name=BALL
-author=Alex Chapman
-description=A minimally non-infringing Pong-like.
-bundleID=io.github.jalexchapman.ball
-version=1.0
-buildNumber=100
-imagePath=SystemAssets
-pdxversion=11200
-buildtime=735508670
