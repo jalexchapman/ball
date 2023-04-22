@@ -11,7 +11,14 @@ function Ball:init()
     self.kSpeedBoost = 0.3
     self.kLeft = -1
     self.kRight = 1
-    self.kVerticalMax = 1.5
+    self.kVerticalMax = 1.4
+
+    self.synth = playdate.sound.synth.new(playdate.sound.kWaveSquare)
+    self.pulse = playdate.sound.lfo.new(playdate.sound.kLFOSawtoothUp)
+    self.pulse:setDepth(0.14)
+    self.pulse:setCenter(0.5)
+    self.pulse:setRate(50)
+    self.synth:setAmplitudeMod(self.pulse)
 
     self:setSize(self.kSize, self.kSize)
     self:moveTo(200,120)
@@ -43,8 +50,10 @@ function Ball:update()
         if next(self:allOverlappingSprites()) ~= nil then
             if self.x < 200 and self.vXNorm == self.kLeft then --left paddle
                 self:bounce(leftPaddle)
+                self:playPaddleTone()
             elseif self.x > 200 and self.vXNorm == self.kRight then --right paddle
                 self:bounce(rightPaddle)
+                self:playPaddleTone()
             end
         end
     end
@@ -53,11 +62,14 @@ function Ball:update()
     if (self.y > 240) then
         self.vYNorm = self.vYNorm * -1
         self:moveTo(self.x, 480 - self.y)
+        self:playWallTone()
     elseif self.y < 0 then
         self.vYNorm = self.vYNorm * -1
         self:moveTo(self.x, -1 * self.y)
+        self:playWallTone()
     end
     if (self.x > 400) then
+        self:playScoreTone()
         if GameState == KPlayState then
             ScoreLeft()
         else
@@ -65,12 +77,31 @@ function Ball:update()
             self:moveTo(800-self.x, self.y)
         end
     elseif (self.x < 0) then
+        self:playScoreTone()
         if GameState == KPlayState then
             ScoreRight()
         else
             self.vXNorm = self.kRight
             self:moveTo(-1 * self.x, self.y)
         end
+    end
+end
+
+function Ball:playWallTone()
+    if GameState == KPlayState then
+        self.synth:playNote(246.94, 0.8, 0.02)
+    end
+end
+
+function Ball:playPaddleTone()
+    if GameState == KPlayState then
+        self.synth:playNote(493.88, 0.8, 0.02)
+    end
+end
+
+function Ball:playScoreTone()
+    if GameState == KPlayState then
+        self.synth:playNote(246.94, 0.8, 0.25)
     end
 end
 

@@ -9,8 +9,7 @@ function Paddle:init()
     Paddle.super.init(self)
 
     self.kWidth=4
-    -- self.kHeight=16
-    self.kHeight=20
+    self.kHeight= 18 --slightly taller than real pong; screen IS tiny
     self.minY=self.kHeight/2 + 8 --8 open at top
     self.maxY = (240 - self.kHeight/2) - 4 -- 4 open at bottom 
 
