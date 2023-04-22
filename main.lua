@@ -5,10 +5,15 @@ import "paddle"
 import "ball"
 import "net"
 import "score"
+import "phosphortrail"
 
 local gfx = playdate.graphics
-playdate.display.setRefreshRate(60)
-
+local title = "BALL"
+local manualText = "Press A or B to start. Right player uses crank.\n\n"..
+                "A game: Left player uses D-pad. Hold left to slow.\n"..
+                "B game: Left player uses tilt. Hold level to center.\n\n"..
+                "Try playing face to face!\n"
+local menuExitText= "press B to continue"
 KGameOverState=0
 KPlayState=1
 
@@ -19,31 +24,51 @@ KLeftPaddleX=48
 KRightPaddleX=352
 
 ImUsingTiltControls = false
+InManual = false
+ManualDrawn = false
 
 function Setup()
-    GameState = KGameOverState
+    playdate.display.setRefreshRate(50) -- this method is capped at 50, but unrestricted can be faster
+
+    PopulateSystemMenu()
+
     gfx.setColor(gfx.kColorBlack)
     gfx.setBackgroundColor(gfx.kColorBlack)
     gfx.fillRect(0, 0, 400, 240)
 
     ball = Ball()
     net = Net()
-
+    ballTrail = PhosphorTrail()
+    ballTrail:addParent(ball)
+    ballTrail:setZIndex(1)
     leftPaddle = Paddle()
+    leftPaddleTrail = PhosphorTrail()
+    leftPaddleTrail:addParent(leftPaddle)
+    leftPaddleTrail:setZIndex(1)
     rightPaddle = Paddle()
+    rightPaddleTrail = PhosphorTrail()
+    rightPaddleTrail:addParent(rightPaddle)
+    rightPaddleTrail:setZIndex(1)
     leftPaddle:moveTo(KLeftPaddleX, 120) --leftPaddle.centerY
     rightPaddle:moveTo(KRightPaddleX, 120) --rightPaddle.centerY
-
+    GameOver()
     LeftScore = Score()
     RightScore = Score()
     LeftScore:moveTo(100,16)
     RightScore:moveTo(300,16)
 end
 
+function PopulateSystemMenu()
+    local menu = playdate.getSystemMenu()
+    menu:addMenuItem("manual", function () InManual = true ManualDrawn = false end)
+end
+
 function ResetGame()
     LeftScore:setScore(0)
     RightScore:setScore(0)
     GameState = KPlayState
+    leftPaddle:setVisible(true)
+    rightPaddle:setVisible(true)
     leftPaddle:addSprite()
     rightPaddle:addSprite()
     ResetPoint()
@@ -68,9 +93,10 @@ function ScoreLeft()
 end
 
 function ResetPoint()
-    ball:removeSprite()
     ball:reset()
-    local delay = playdate.timer.performAfterDelay(KResetDelay, function() ball:addSprite() end)
+    ball:removeSprite()
+    ball:setVisible(false)
+    local delay = playdate.timer.performAfterDelay(KResetDelay, function() ball:addSprite() ball:setVisible(true) end)
 end
 
 function GetLeftInput()
@@ -110,6 +136,8 @@ end
 function GameOver()
     GameState = KGameOverState
     playdate.stopAccelerometer()
+    leftPaddle:setVisible(false)
+    rightPaddle:setVisible(false)
     leftPaddle:removeSprite()
     rightPaddle:removeSprite()
 end
@@ -120,23 +148,52 @@ function GetRightInput()
     rightPaddle.yControl = -1 * math.cos(math.rad(crankDeg))
 end
 
+function RenderManual()
+    if ManualDrawn then
+        if playdate.buttonJustPressed(playdate.kButtonB) then
+            gfx.setColor(gfx.kColorBlack)
+            gfx.fillRect(0,0,400,240)
+            InManual = false
+        end
+    else
+        gfx.setColor(gfx.kColorBlack)
+        gfx.fillRect(0,0,400,240)
+        gfx.setImageDrawMode(gfx.kDrawModeFillWhite)
+        local font = gfx.getSystemFont(gfx.font.kVariantBold)
+        font:drawTextAligned(title, 200, 10, kTextAlignment.center)
+        font = gfx.getSystemFont()
+        font:drawTextAligned(manualText, 0, 45, kTextAlignment.left)
+        font:drawTextAligned(menuExitText, 200, 220, kTextAlignment.center)
+        ManualDrawn = true
+    end
+end
+
 function playdate.update()
-    if (GameState == KPlayState) then
-        GetLeftInput()
-        GetRightInput()
+    if InManual then
+        RenderManual()
+    else
+        --input and animation
+        if (GameState == KPlayState) then
+            GetLeftInput()
+            GetRightInput()
+        end
+        playdate.graphics.sprite.update()
+        playdate.timer.updateTimers()
+
+        --game over options
+        if GameState == KGameOverState then
+            if playdate.buttonJustPressed(playdate.kButtonA) then
+                ImUsingTiltControls = false
+                ResetGame()
+            end
+            if playdate.buttonJustPressed(playdate.kButtonB) then
+                ImUsingTiltControls = true
+                playdate.startAccelerometer()
+                ResetGame()
+            end    
+        end
     end
 
-    playdate.graphics.sprite.update()
-    if (playdate.buttonIsPressed(playdate.kButtonA) and GameState == KGameOverState) then
-        ImUsingTiltControls = false
-        ResetGame()
-    end
-    if (playdate.buttonIsPressed(playdate.kButtonB) and GameState == KGameOverState) then
-        ImUsingTiltControls = true
-        playdate.startAccelerometer()
-        ResetGame()
-    end
-    playdate.timer.updateTimers()
 end
 
 Setup()

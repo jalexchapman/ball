@@ -40,8 +40,7 @@ function Ball:update()
     self:moveBy(self.vXNorm * self.speed, self.vYNorm * self.speed)
     --paddle bounce
     if (GameState == KPlayState) then
-        local overlap = self:allOverlappingSprites()
-        if next(overlap) ~= nil then
+        if next(self:allOverlappingSprites()) ~= nil then
             if self.x < 200 and self.vXNorm == self.kLeft then --left paddle
                 self:bounce(leftPaddle)
             elseif self.x > 200 and self.vXNorm == self.kRight then --right paddle
@@ -79,6 +78,6 @@ function Ball:bounce(paddle)
     self.vXNorm *= -1
     self.speed += self.kSpeedBoost
 
-    --difference/height ranges from -.5 to .5; norm to -2 to 2
+    --difference/height ranges from -.5 to .5; norm to -kVerticalMax to kVerticalMax
     self.vYNorm = 2 * self.kVerticalMax *(self.y - paddle.y)/(paddle.kHeight)
 end

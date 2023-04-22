@@ -21,6 +21,7 @@ function Paddle:init()
     self:setCenter(0.5,0.5)
     self:setSize(self.kWidth, self.kHeight)
     self:setCollideRect(0,0,self:getSize())
+    self:addSprite()
 
 end
 

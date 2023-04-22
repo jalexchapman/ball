@@ -1,9 +1,9 @@
-name=Quickie Pong
+name=BALL
 author=Alex Chapman
-description=A basic Pong.
-bundleID=io.github.jalexchapman.quickiepong
+description=A minimally non-infringing Pong-like.
+bundleID=io.github.jalexchapman.ball
 version=1.0
 buildNumber=100
 imagePath=SystemAssets
 pdxversion=11200
-buildtime=735378963
+buildtime=735508670
