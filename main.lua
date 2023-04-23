@@ -44,11 +44,9 @@ function Setup()
     leftPaddle = Paddle()
     leftPaddleTrail = PhosphorTrail()
     leftPaddleTrail:addParent(leftPaddle)
-    leftPaddleTrail:setZIndex(1)
     rightPaddle = Paddle()
     rightPaddleTrail = PhosphorTrail()
     rightPaddleTrail:addParent(rightPaddle)
-    rightPaddleTrail:setZIndex(1)
     leftPaddle:moveTo(KLeftPaddleX, 120) --leftPaddle.centerY
     rightPaddle:moveTo(KRightPaddleX, 120) --rightPaddle.centerY
     GameOver()
@@ -192,6 +190,10 @@ function playdate.update()
                 ResetGame()
             end    
         end
+
+        -- gfx.setColor(gfx.kColorWhite)
+        -- gfx.fillRect(0,0,15,12)
+        -- playdate.drawFPS()
     end
 
 end
