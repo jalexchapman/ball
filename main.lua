@@ -6,14 +6,10 @@ import "ball"
 import "net"
 import "score"
 import "phosphortrail"
+import "bloom"
 
 local gfx = playdate.graphics
-local title = "BALL"
-local manualText = "Press A or B to start. Right player uses crank.\n\n"..
-                "A game: Left player uses D-pad. Hold left to slow.\n"..
-                "B game: Left player uses tilt. Hold level to center.\n\n"..
-                "Try playing face to face!\n"
-local menuExitText= "press B to continue"
+
 KGameOverState=0
 KPlayState=1
 
@@ -24,13 +20,9 @@ KLeftPaddleX=48
 KRightPaddleX=352
 
 ImUsingTiltControls = false
-InManual = false
-ManualDrawn = false
 
 function Setup()
     playdate.display.setRefreshRate(50) -- this method is capped at 50, but unrestricted can be faster
-
-    PopulateSystemMenu()
 
     gfx.setColor(gfx.kColorBlack)
     gfx.setBackgroundColor(gfx.kColorBlack)
@@ -40,13 +32,18 @@ function Setup()
     net = Net()
     ballTrail = PhosphorTrail()
     ballTrail:addParent(ball)
-    ballTrail:setZIndex(1)
+    ballTrail:setLength(6)
+    ballBloom = Bloom()
+    ballBloom:addParent(ball)
+    ballBloom:removeSprite()
     leftPaddle = Paddle()
     leftPaddleTrail = PhosphorTrail()
     leftPaddleTrail:addParent(leftPaddle)
+    leftPaddleTrail:setLength(3)
     rightPaddle = Paddle()
     rightPaddleTrail = PhosphorTrail()
     rightPaddleTrail:addParent(rightPaddle)
+    rightPaddleTrail:setLength(3)
     leftPaddle:moveTo(KLeftPaddleX, 120) --leftPaddle.centerY
     rightPaddle:moveTo(KRightPaddleX, 120) --rightPaddle.centerY
     GameOver()
@@ -54,11 +51,34 @@ function Setup()
     RightScore = Score()
     LeftScore:moveTo(100,16)
     RightScore:moveTo(300,16)
+    PopulateSystemMenu()
 end
 
 function PopulateSystemMenu()
+    playdate.setMenuImage(gfx.image.new("instructioncard.png"))
     local menu = playdate.getSystemMenu()
-    menu:addMenuItem("manual", function () InManual = true ManualDrawn = false end)
+    menu:addOptionsMenuItem("trails", {"0", "S", "M", "L"}, "M", SetBallTrailLength)
+    menu:addCheckmarkMenuItem("ballglow", false, SetBallBloom)
+end
+
+function SetBallBloom(enabled)
+    if enabled then
+        ballBloom:addSprite()
+    else
+        ballBloom:removeSprite()
+    end
+end
+
+function SetBallTrailLength(lengthName)
+    if lengthName == "0" then
+        ballTrail:setLength(1)
+    elseif lengthName == "S" then
+        ballTrail:setLength(4)
+    elseif lengthName == "M" then
+        ballTrail:setLength(6)
+    elseif lengthName == "L" then
+        ballTrail:setLength(13)
+    end
 end
 
 function ResetGame()
@@ -144,26 +164,6 @@ end
 function GetRightInput()
     local crankDeg = playdate.getCrankPosition()
     rightPaddle.yControl = -1 * math.cos(math.rad(crankDeg))
-end
-
-function RenderManual()
-    if ManualDrawn then
-        if playdate.buttonJustPressed(playdate.kButtonB) then
-            gfx.setColor(gfx.kColorBlack)
-            gfx.fillRect(0,0,400,240)
-            InManual = false
-        end
-    else
-        gfx.setColor(gfx.kColorBlack)
-        gfx.fillRect(0,0,400,240)
-        gfx.setImageDrawMode(gfx.kDrawModeFillWhite)
-        local font = gfx.getSystemFont(gfx.font.kVariantBold)
-        font:drawTextAligned(title, 200, 10, kTextAlignment.center)
-        font = gfx.getSystemFont()
-        font:drawTextAligned(manualText, 0, 45, kTextAlignment.left)
-        font:drawTextAligned(menuExitText, 200, 220, kTextAlignment.center)
-        ManualDrawn = true
-    end
 end
 
 function playdate.update()

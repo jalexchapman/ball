@@ -7,7 +7,7 @@ class('Score').extends(playdate.graphics.sprite)
 
 function Score:init()
     Score.super.init(self)
-    self.scoreFont = gfx.font.new('pong.pft')
+    self.scoreFont = gfx.font.new('ditheredScore.pft')
     self:setCenter(0.5,0)
     self:setSize(57,32)
     self:setScore(0)

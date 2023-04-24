@@ -5,7 +5,7 @@ local gfx = playdate.graphics
 class('PhosphorTrail').extends(playdate.graphics.sprite)
 
 function PhosphorTrail:init()
-    self.kFrames = 5
+    self.trailFrames = 5
     self.visibilities = {}
     self.positions = {}
     
@@ -17,15 +17,33 @@ function PhosphorTrail:init()
     self.parentHeight=0
 
 
-    for i=1,self.kFrames do
+    for i=1,self.trailFrames do
         table.insert(self.visibilities, false)
     end
-    for i=1, self.kFrames do
+    for i=1, self.trailFrames do
         table.insert(self.positions, {0,0})
     end
     self:addSprite()
-    --self:setZIndex(32767) -- ensure this is updated after parent sprite
+    self:setZIndex(32767) -- ensure this is updated after parent sprite
 
+end
+
+function PhosphorTrail:setLength(newFrames)
+    if newFrames < 1 then
+        newFrames = 1 -- always store curent pos, never empty
+    end
+    if newFrames < self.trailFrames then
+        for i = 1, self.trailFrames - newFrames do
+            table.remove(self.positions, 1)
+            table.remove(self.visibilities, 1)
+        end
+    elseif newFrames > self.trailFrames then
+        for i = 1, newFrames - self.trailFrames do
+            table.insert(self.positions, {0,0})
+            table.insert(self.visibilities, false)
+        end
+    end
+    self.trailFrames = newFrames
 end
 
 function PhosphorTrail:addParent(parentSprite)
@@ -35,7 +53,7 @@ end
 
 function PhosphorTrail:update()
     if self.parent ~= nil then
-        local lastPos = self.positions[self.kFrames]
+        local lastPos = self.positions[self.trailFrames]
         local newPos = {self.parent.x, self.parent.y}
         local midPos = {(lastPos[1]+newPos[1])/2, (lastPos[2]+newPos[2])/2}
         table.remove(self.positions, 1)
@@ -68,9 +86,9 @@ function PhosphorTrail:update()
 end
 
 function PhosphorTrail:draw()
-    for i=1, self.kFrames - 1 do --no need to overdraw the actual sprite
+    for i=1, self.trailFrames - 1 do --no need to overdraw the actual sprite
         if self.visibilities[i] then
-            local alpha = (i/self.kFrames) * 0.625 -- bit of rapid falloff
+            local alpha = (i/self.trailFrames) * 0.625 -- bit of rapid falloff
             gfx.setColor(gfx.kColorWhite)
             gfx.setDitherPattern(1 - alpha, gfx.image.kDitherTypeBayer4x4)
             local pos = self.positions[i]
