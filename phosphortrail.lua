@@ -5,7 +5,7 @@ local gfx = playdate.graphics
 class('PhosphorTrail').extends(playdate.graphics.sprite)
 
 function PhosphorTrail:init()
-    self.trailFrames = 5
+    self.trailFrames = 3
     self.visibilities = {}
     self.positions = {}
     
