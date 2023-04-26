@@ -8,10 +8,10 @@ function Ball:init()
 
     self.kSize=5
     self.kInitialSpeed = 3.0
-    self.kSpeedBoost = 0.3
+    self.kSpeedBoost = 0.4
     self.kLeft = -1
     self.kRight = 1
-    self.kVerticalMax = 1.4
+    self.kVerticalMax = 1.25
 
     self.synth = playdate.sound.synth.new(playdate.sound.kWaveSquare)
     self.pulse = playdate.sound.lfo.new(playdate.sound.kLFOSawtoothUp)
@@ -108,7 +108,9 @@ end
 function Ball:bounce(paddle)
     self.vXNorm *= -1
     self.speed += self.kSpeedBoost
-
+    local paddleBank = 2 * (self.y - paddle.y)/paddle.height
+    paddleBank = math.min (paddleBank, 1)
+    paddleBank = math.max (paddleBank, -1) --range -1 to 1, no bleedover
     --difference/height ranges from -.5 to .5; norm to -kVerticalMax to kVerticalMax
-    self.vYNorm = 2 * self.kVerticalMax *(self.y - paddle.y)/(paddle.kHeight)
+    self.vYNorm = paddleBank * self.kVerticalMax
 end
