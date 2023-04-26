@@ -167,35 +167,30 @@ function GetRightInput()
 end
 
 function playdate.update()
-    if InManual then
-        RenderManual()
-    else
-        --input and animation
-        if (GameState == KPlayState) then
-            GetLeftInput()
-            GetRightInput()
-        end
-        playdate.graphics.sprite.update()
-        playdate.timer.updateTimers()
+    --input and animation
+    if (GameState == KPlayState) then
+        GetLeftInput()
+        GetRightInput()
+    end
+    playdate.graphics.sprite.update()
+    playdate.timer.updateTimers()
 
-        --game over options
-        if GameState == KGameOverState then
-            if playdate.buttonJustPressed(playdate.kButtonA) then
-                ImUsingTiltControls = false
-                ResetGame()
-            end
-            if playdate.buttonJustPressed(playdate.kButtonB) then
-                ImUsingTiltControls = true
-                playdate.startAccelerometer()
-                ResetGame()
-            end    
+    --game over options
+    if GameState == KGameOverState then
+        if playdate.buttonJustPressed(playdate.kButtonA) then
+            ImUsingTiltControls = false
+            ResetGame()
         end
-
-        -- gfx.setColor(gfx.kColorWhite)
-        -- gfx.fillRect(0,0,15,12)
-        -- playdate.drawFPS()
+        if playdate.buttonJustPressed(playdate.kButtonB) then
+            ImUsingTiltControls = true
+            playdate.startAccelerometer()
+            ResetGame()
+        end    
     end
 
+    -- gfx.setColor(gfx.kColorWhite)
+    -- gfx.fillRect(0,0,15,12)
+    -- playdate.drawFPS()
 end
 
 Setup()
