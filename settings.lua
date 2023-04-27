@@ -20,10 +20,10 @@ function PopulateSystemMenu()
     local menu = playdate.getSystemMenu()
     
     menu:addOptionsMenuItem("trails", {"0", "S", "M", "L"}, MenuValues.ballTrailLength, SetBallTrailLength)
-    SetSensitivity(MenuValues.sensitivity)
+    SetBallTrailLength(MenuValues.ballTrailLength)
     
     menu:addOptionsMenuItem("sensitivity", {"1", "2", "3", "4"}, MenuValues.sensitivity, SetSensitivity)
-    SetBallTrailLength(MenuValues.ballTrailLength)
+    SetSensitivity(MenuValues.sensitivity)
 
     menu:addMenuItem("credits", function() InCredits = true CreditsDrawn = false end)
 end
