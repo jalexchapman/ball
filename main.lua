@@ -23,6 +23,9 @@ KRightPaddleX=352
 
 ImUsingTiltControls = false
 
+InCredits = false
+CreditsDrawn = false
+
 function Setup()
     playdate.display.setRefreshRate(50) -- this method is capped at 50, but unrestricted can be faster
 
@@ -98,30 +101,62 @@ function ScoreLeft()
 end
 
 function playdate.update()
-    --input and animation
-    if (GameState == KPlayState) then
-        GetLeftInput()
-        GetRightInput()
-    end
-    playdate.graphics.sprite.update()
-    playdate.timer.updateTimers()
-
-    --game over options
-    if GameState == KGameOverState then
-        if playdate.buttonJustPressed(playdate.kButtonA) then
-            ImUsingTiltControls = false
-            ResetGame()
+    if InCredits then
+        RenderCredits()
+    else
+        --input and animation
+        if (GameState == KPlayState) then
+            GetLeftInput()
+            GetRightInput()
         end
+        playdate.graphics.sprite.update()
+        playdate.timer.updateTimers()
+
+        --game over options
+        if GameState == KGameOverState then
+            if playdate.buttonJustPressed(playdate.kButtonA) then
+                ImUsingTiltControls = false
+                ResetGame()
+            end
+            if playdate.buttonJustPressed(playdate.kButtonB) then
+                ImUsingTiltControls = true
+                playdate.startAccelerometer()
+                ResetGame()
+            end
+        end
+
+        -- gfx.setColor(gfx.kColorWhite)
+        -- gfx.fillRect(0,0,15,12)
+        -- playdate.drawFPS()
+    end
+end
+
+function RenderCredits()
+    if CreditsDrawn then
         if playdate.buttonJustPressed(playdate.kButtonB) then
-            ImUsingTiltControls = true
-            playdate.startAccelerometer()
-            ResetGame()
+            gfx.setColor(gfx.kColorBlack)
+            gfx.fillRect(0,0,400,240)
+            InCredits = false
         end
+    else
+        gfx.setColor(gfx.kColorBlack)
+        gfx.fillRect(0,0,400,240)
+        gfx.setColor(gfx.kColorWhite)
+        gfx.fillRoundRect(5,5,390,235,5)
+        gfx.setColor(gfx.kColorBlack)
+        gfx.setImageDrawMode(gfx.kDrawModeFillBlack)
+        gfx.drawRoundRect(7,7,386,231,3)
+        local boldFont = gfx.getSystemFont(gfx.font.kVariantBold)
+        local font = gfx.getSystemFont()
+        boldFont:drawTextAligned("BALL", 200, 30, kTextAlignment.center)
+        boldFont:drawTextAligned("by Alex Chapman", 25, 55, kTextAlignment.left)
+        boldFont:drawTextAligned("source:", 25, 75, kTextAlignment.left)
+        font:drawTextAligned("https://github.com/jalexchapman/ball", 35, 95, kTextAlignment.left)
+        boldFont:drawTextAligned("PONG original game design", 200, 145, kTextAlignment.center)
+        boldFont:drawTextAligned("by Al Alcorn and Atari, Inc.", 25, 170, kTextAlignment.left)
+        boldFont:drawTextAligned("(press B)", 200, 210, kTextAlignment.center)
+        CreditsDrawn = true
     end
-
-    -- gfx.setColor(gfx.kColorWhite)
-    -- gfx.fillRect(0,0,15,12)
-    -- playdate.drawFPS()
 end
 
 Setup()

@@ -8,9 +8,8 @@ function InitializeSettings()
     MenuValues = playdate.datastore.read("MenuValues")
     if MenuValues == nil
      or MenuValues.ballTrailLength == nil
-     or MenuValues.bloom == nil
      or MenuValues.sensitivity == nil then
-        MenuValues = {ballTrailLength = "M", bloom = true, sensitivity = "1"}
+        MenuValues = {ballTrailLength = "M", sensitivity = "1"}
         playdate.datastore.delete("MenuValues")
     end
     PopulateSystemMenu()
@@ -23,33 +22,26 @@ function PopulateSystemMenu()
     menu:addOptionsMenuItem("trails", {"0", "S", "M", "L"}, MenuValues.ballTrailLength, SetBallTrailLength)
     SetSensitivity(MenuValues.sensitivity)
     
-    menu:addCheckmarkMenuItem("ball glow", MenuValues.bloom, SetBallBloom)
-    SetBallTrailLength(MenuValues.ballTrailLength)
-    
     menu:addOptionsMenuItem("sensitivity", {"1", "2", "3", "4"}, MenuValues.sensitivity, SetSensitivity)
-    SetBallBloom(MenuValues.bloom)
-end
+    SetBallTrailLength(MenuValues.ballTrailLength)
 
-function SetBallBloom(enabled)
-    MenuValues.bloom = enabled
-    if enabled then
-        ballBloom:addSprite()
-    else
-        ballBloom:removeSprite()
-    end
-    playdate.datastore.write(MenuValues, "MenuValues")
+    menu:addMenuItem("credits", function() InCredits = true CreditsDrawn = false end)
 end
 
 function SetBallTrailLength(lengthName)
     MenuValues.ballTrailLength = lengthName
     if lengthName == "0" then
         ballTrail:setLength(1)
+        ballBloom:removeSprite()
     elseif lengthName == "S" then
         ballTrail:setLength(4)
+        ballBloom:removeSprite()
     elseif lengthName == "M" then
         ballTrail:setLength(6)
+        ballBloom:addSprite()
     elseif lengthName == "L" then
         ballTrail:setLength(13)
+        ballBloom:addSprite()
     end
     playdate.datastore.write(MenuValues, "MenuValues")
 end
