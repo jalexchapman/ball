@@ -115,13 +115,13 @@ function playdate.update()
         --game over options
         if GameState == KGameOverState then
             if playdate.buttonJustPressed(playdate.kButtonA) then
-                ImUsingTiltControls = false
+                if ImUsingTiltControls then
+                    playdate.startAccelerometer()
+                end
                 ResetGame()
             end
             if playdate.buttonJustPressed(playdate.kButtonB) then
-                ImUsingTiltControls = true
-                playdate.startAccelerometer()
-                ResetGame()
+                --TODO: start rally gametype (co-op/solitaire)
             end
         end
 

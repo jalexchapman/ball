@@ -8,8 +8,9 @@ function InitializeSettings()
     MenuValues = playdate.datastore.read("MenuValues")
     if MenuValues == nil
      or MenuValues.ballTrailLength == nil
-     or MenuValues.sensitivity == nil then
-        MenuValues = {ballTrailLength = "M", sensitivity = "1"}
+     or MenuValues.sensitivity == nil
+     or MenuValues.leftPaddleControl == nil then
+        MenuValues = {ballTrailLength = "M", sensitivity = "1", leftPaddleControl = "tilt"}
         playdate.datastore.delete("MenuValues")
     end
     PopulateSystemMenu()
@@ -25,7 +26,10 @@ function PopulateSystemMenu()
     menu:addOptionsMenuItem("sensitivity", {"1", "2", "3", "4"}, MenuValues.sensitivity, SetSensitivity)
     SetSensitivity(MenuValues.sensitivity)
 
-    menu:addMenuItem("credits", function() InCredits = true CreditsDrawn = false end)
+    menu:addOptionsMenuItem("left paddle", {"tilt", "pad"}, MenuValues.leftPaddleControl, SetLeftPaddleControl)
+    SetLeftPaddleControl(MenuValues.leftPaddleControl)
+
+    -- menu:addMenuItem("credits", function() InCredits = true CreditsDrawn = false end)
 end
 
 function SetBallTrailLength(lengthName)
@@ -60,6 +64,20 @@ function SetSensitivity(sensitivityName)
     else
         TiltSensitivity = 1.5
         CrankSensitivity = 1.5
+    end
+    playdate.datastore.write(MenuValues, "MenuValues")
+end
+
+function SetLeftPaddleControl(controlStyleName)
+    MenuValues.leftPaddleControl = controlStyleName
+    if controlStyleName == "tilt" then
+        ImUsingTiltControls = true
+        if GameState ~= KGameOverState then
+            playdate.startAccelerometer()
+        end
+    else
+        ImUsingTiltControls = false
+        playdate.stopAccelerometer()
     end
     playdate.datastore.write(MenuValues, "MenuValues")
 end
