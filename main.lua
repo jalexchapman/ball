@@ -15,6 +15,9 @@ local gfx = playdate.graphics
 KGameOverState=0
 KPlayState=1
 
+KMatchMode=0
+KRallyMode=1
+
 KMaxScore=11
 KResetDelay=1000 --milliseconds
 
@@ -33,6 +36,7 @@ function Setup()
     gfx.setBackgroundColor(gfx.kColorBlack)
     gfx.fillRect(0, 0, 400, 240)
 
+    GameMode=KMatchMode
     ball = Ball()
     net = Net()
     ballTrail = PhosphorTrail()
@@ -65,7 +69,11 @@ function GameOver()
 end
 
 function ResetGame()
-    LeftScore:setScore(0)
+    if GameMode == KMatchMode then
+        LeftScore:setScore("0")
+    else
+        LeftScore:setScore("") --hide left score
+    end
     RightScore:setScore(0)
     GameState = KPlayState
     leftPaddle:setVisible(true)
@@ -83,20 +91,34 @@ function ResetPoint()
 end
 
 function ScoreRight()
-    RightScore:setScore(RightScore.score + 1)
-    if (RightScore.score >= KMaxScore) then
+    if GameMode == KRallyMode then
         GameOver()
     else
-        ResetPoint()
+        RightScore:setScore(RightScore.score + 1)
+        if (RightScore.score >= KMaxScore) then
+            GameOver()
+        else
+            ResetPoint()
+        end
     end
 end
 
 function ScoreLeft()
-    LeftScore:setScore(LeftScore.score + 1)
-    if (LeftScore.score >= KMaxScore) then
+    if GameMode == KRallyMode then
         GameOver()
     else
-        ResetPoint()
+        LeftScore:setScore(LeftScore.score + 1)
+        if (LeftScore.score >= KMaxScore) then
+            GameOver()
+        else
+            ResetPoint()
+        end
+    end
+end
+
+function ScoreRally()
+    if GameMode == KRallyMode then
+        RightScore:setScore(RightScore.score + 1)
     end
 end
 
@@ -115,13 +137,18 @@ function playdate.update()
         --game over options
         if GameState == KGameOverState then
             if playdate.buttonJustPressed(playdate.kButtonA) then
+                GameMode = KMatchMode
                 if ImUsingTiltControls then
                     playdate.startAccelerometer()
                 end
                 ResetGame()
             end
             if playdate.buttonJustPressed(playdate.kButtonB) then
-                --TODO: start rally gametype (co-op/solitaire)
+                GameMode = KRallyMode
+                if ImUsingTiltControls then
+                    playdate.startAccelerometer()
+                end
+                ResetGame()
             end
         end
 

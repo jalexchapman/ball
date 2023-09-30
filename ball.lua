@@ -113,4 +113,5 @@ function Ball:bounce(paddle)
     paddleBank = math.max (paddleBank, -1) --range -1 to 1, no bleedover
     --difference/height ranges from -.5 to .5; norm to -kVerticalMax to kVerticalMax
     self.vYNorm = paddleBank * self.kVerticalMax
+    ScoreRally()
 end
