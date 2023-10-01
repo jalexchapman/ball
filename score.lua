@@ -26,7 +26,7 @@ function Score:draw(x, y, width, height)
     gfx.setFont(self.scoreFont)
     gfx.setImageDrawMode(gfx.kDrawModeFillWhite)
     local scoreText = self.score
-    if scoreText < 10 then scoreText = " "..scoreText end
+    if type(scoreText) == "number" and scoreText < 10 then scoreText = " "..scoreText end
     gfx.drawText(scoreText, 0,0)
     gfx.setBackgroundColor(gfx.kColorBlack)
 

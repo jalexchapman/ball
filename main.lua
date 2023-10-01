@@ -9,11 +9,16 @@ import "phosphortrail"
 import "bloom"
 import "settings"
 import "input"
+import "starthint"
+
 
 local gfx = playdate.graphics
 
 KGameOverState=0
 KPlayState=1
+
+KMatchMode=0
+KRallyMode=1
 
 KMaxScore=11
 KResetDelay=1000 --milliseconds
@@ -26,6 +31,8 @@ ImUsingTiltControls = false
 InCredits = false
 CreditsDrawn = false
 
+HintsEnabled = true
+
 function Setup()
     playdate.display.setRefreshRate(50) -- this method is capped at 50, but unrestricted can be faster
 
@@ -33,6 +40,7 @@ function Setup()
     gfx.setBackgroundColor(gfx.kColorBlack)
     gfx.fillRect(0, 0, 400, 240)
 
+    GameMode=KMatchMode
     ball = Ball()
     net = Net()
     ballTrail = PhosphorTrail()
@@ -47,6 +55,7 @@ function Setup()
     rightPaddleTrail:addParent(rightPaddle)
     leftPaddle:moveTo(KLeftPaddleX, 120) --leftPaddle.centerY
     rightPaddle:moveTo(KRightPaddleX, 120) --rightPaddle.centerY
+    startHint = StartHint()
     GameOver()
     LeftScore = Score()
     RightScore = Score()
@@ -62,16 +71,25 @@ function GameOver()
     rightPaddle:setVisible(false)
     leftPaddle:removeSprite()
     rightPaddle:removeSprite()
+    if HintsEnabled then
+        startHint:addSprite()
+    end
 end
 
 function ResetGame()
-    LeftScore:setScore(0)
+    HintsEnabled = false -- no start hint after first game
+    if GameMode == KMatchMode then
+        LeftScore:setScore("0")
+    else
+        LeftScore:setScore("") --hide left score
+    end
     RightScore:setScore(0)
     GameState = KPlayState
     leftPaddle:setVisible(true)
     rightPaddle:setVisible(true)
     leftPaddle:addSprite()
     rightPaddle:addSprite()
+    startHint:removeSprite()
     ResetPoint()
 end
 
@@ -83,20 +101,34 @@ function ResetPoint()
 end
 
 function ScoreRight()
-    RightScore:setScore(RightScore.score + 1)
-    if (RightScore.score >= KMaxScore) then
+    if GameMode == KRallyMode then
         GameOver()
     else
-        ResetPoint()
+        RightScore:setScore(RightScore.score + 1)
+        if (RightScore.score >= KMaxScore) then
+            GameOver()
+        else
+            ResetPoint()
+        end
     end
 end
 
 function ScoreLeft()
-    LeftScore:setScore(LeftScore.score + 1)
-    if (LeftScore.score >= KMaxScore) then
+    if GameMode == KRallyMode then
         GameOver()
     else
-        ResetPoint()
+        LeftScore:setScore(LeftScore.score + 1)
+        if (LeftScore.score >= KMaxScore) then
+            GameOver()
+        else
+            ResetPoint()
+        end
+    end
+end
+
+function ScoreRally()
+    if GameMode == KRallyMode then
+        RightScore:setScore(RightScore.score + 1)
     end
 end
 
@@ -115,12 +147,17 @@ function playdate.update()
         --game over options
         if GameState == KGameOverState then
             if playdate.buttonJustPressed(playdate.kButtonA) then
-                ImUsingTiltControls = false
+                GameMode = KMatchMode
+                if ImUsingTiltControls then
+                    playdate.startAccelerometer()
+                end
                 ResetGame()
             end
             if playdate.buttonJustPressed(playdate.kButtonB) then
-                ImUsingTiltControls = true
-                playdate.startAccelerometer()
+                GameMode = KRallyMode
+                if ImUsingTiltControls then
+                    playdate.startAccelerometer()
+                end
                 ResetGame()
             end
         end
