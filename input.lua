@@ -19,13 +19,13 @@ function GetLeftInput()
 
     else
         if (playdate.buttonIsPressed(playdate.kButtonUp)) then
-            if playdate.buttonIsPressed(playdate.kButtonLeft) then
+            if playdate.buttonIsPressed(playdate.kButtonLeft) or playdate.buttonIsPressed(playdate.kButtonRight) then
                 leftPaddle.yControl -= 0.04
             else
                 leftPaddle.yControl -= 0.1
             end
         elseif playdate.buttonIsPressed(playdate.kButtonDown) then
-            if playdate.buttonIsPressed(playdate.kButtonLeft) then
+            if playdate.buttonIsPressed(playdate.kButtonLeft) or playdate.buttonIsPressed(playdate.kButtonRight) then
                 leftPaddle.yControl += 0.04
             else
                 leftPaddle.yControl += 0.1

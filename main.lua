@@ -9,6 +9,8 @@ import "phosphortrail"
 import "bloom"
 import "settings"
 import "input"
+import "starthint"
+
 
 local gfx = playdate.graphics
 
@@ -28,6 +30,8 @@ ImUsingTiltControls = false
 
 InCredits = false
 CreditsDrawn = false
+
+HintsEnabled = true
 
 function Setup()
     playdate.display.setRefreshRate(50) -- this method is capped at 50, but unrestricted can be faster
@@ -51,6 +55,7 @@ function Setup()
     rightPaddleTrail:addParent(rightPaddle)
     leftPaddle:moveTo(KLeftPaddleX, 120) --leftPaddle.centerY
     rightPaddle:moveTo(KRightPaddleX, 120) --rightPaddle.centerY
+    startHint = StartHint()
     GameOver()
     LeftScore = Score()
     RightScore = Score()
@@ -66,9 +71,13 @@ function GameOver()
     rightPaddle:setVisible(false)
     leftPaddle:removeSprite()
     rightPaddle:removeSprite()
+    if HintsEnabled then
+        startHint:addSprite()
+    end
 end
 
 function ResetGame()
+    HintsEnabled = false -- no start hint after first game
     if GameMode == KMatchMode then
         LeftScore:setScore("0")
     else
@@ -80,6 +89,7 @@ function ResetGame()
     rightPaddle:setVisible(true)
     leftPaddle:addSprite()
     rightPaddle:addSprite()
+    startHint:removeSprite()
     ResetPoint()
 end
 
