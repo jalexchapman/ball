@@ -87,8 +87,8 @@ function PhosphorTrail:draw()
             gfx.setColor(gfx.kColorWhite)
             gfx.setDitherPattern(1 - alpha, gfx.image.kDitherTypeBayer4x4)
             local pos = self.positions[i]
-            gfx.fillRect((pos[1]-self.x) - math.floor(self.parentWidth/2),
-                (pos[2]-self.y) - math.floor(self.parentHeight/2),
+            gfx.fillRect((pos[1]-self.x) - math.ceil(self.parentWidth/2),
+                (pos[2]-self.y) - math.ceil(self.parentHeight/2),
                 self.parentWidth, self.parentHeight)
         end
     end
