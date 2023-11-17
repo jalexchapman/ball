@@ -20,7 +20,7 @@ function PopulateSystemMenu()
     playdate.setMenuImage(gfx.image.new("instructioncard.png"))
     local menu = playdate.getSystemMenu()
     
-    menu:addOptionsMenuItem("trails", {"0", "S", "M", "L"}, MenuValues.ballTrailLength, SetBallTrailLength)
+    menu:addOptionsMenuItem("trails", {"0", "S", "M", "L", "XL", "XXL"}, MenuValues.ballTrailLength, SetBallTrailLength)
     SetBallTrailLength(MenuValues.ballTrailLength)
     
     menu:addOptionsMenuItem("sensitivity", {"1", "2", "3", "4"}, MenuValues.sensitivity, SetSensitivity)
@@ -34,19 +34,28 @@ end
 
 function SetBallTrailLength(lengthName)
     MenuValues.ballTrailLength = lengthName
+    local len = 0
     if lengthName == "0" then
-        ballTrail:setLength(1)
+        len = 1
         ballBloom:removeSprite()
     elseif lengthName == "S" then
-        ballTrail:setLength(4)
         ballBloom:removeSprite()
     elseif lengthName == "M" then
-        ballTrail:setLength(6)
+        len = 6
         ballBloom:addSprite()
     elseif lengthName == "L" then
-        ballTrail:setLength(13)
+        len = 13
+        ballBloom:addSprite()
+    elseif lengthName == "XL" then
+        len = 25
+        ballBloom:addSprite()
+    elseif lengthName == "XXL" then
+        len = 50
         ballBloom:addSprite()
     end
+    ballTrail:setLength(len)
+    leftPaddleTrail:setLength(math.min(len, 25))
+    rightPaddleTrail:setLength(math.min(len, 25))
     playdate.datastore.write(MenuValues, "MenuValues")
 end
 
