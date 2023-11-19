@@ -39,6 +39,7 @@ function SetBallTrailLength(lengthName)
         len = 1
         ballBloom:removeSprite()
     elseif lengthName == "S" then
+        len = 4
         ballBloom:removeSprite()
     elseif lengthName == "M" then
         len = 6
