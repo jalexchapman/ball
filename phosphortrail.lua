@@ -10,7 +10,7 @@ function PhosphorTrail:init()
     self.positions = {}
     
     self:setSize(400, 240)
-    self:setCenter(0.5,0.5)
+    self:setCenter(0,0)
     self:moveTo(0,0)
 
     self.parentWidth=0
@@ -55,13 +55,8 @@ function PhosphorTrail:update()
     if self.parent ~= nil then
         local lastPos = self.positions[self.trailFrames]
         local newPos = {self.parent.x, self.parent.y}
-        local midPos = {(lastPos[1]+newPos[1])/2, (lastPos[2]+newPos[2])/2}
-        table.remove(self.positions, 1)
-        table.insert(self.positions, midPos)
         table.remove(self.positions, 1)
         table.insert(self.positions, newPos)
-        table.remove(self.visibilities, 1)
-        table.insert(self.visibilities, self.parent:isVisible())
         table.remove(self.visibilities, 1)
         table.insert(self.visibilities, self.parent:isVisible())
 
@@ -76,8 +71,8 @@ function PhosphorTrail:update()
         -- print("trail x [", minTrailX, ",", maxTrailX,"] y [",minTrailY, ",", maxTrailY, "]")
         self:setSize(maxTrailX - minTrailX + self.parentWidth,
                 maxTrailY - minTrailY + self.parentHeight)
-        self:moveTo(math.floor(maxTrailX + minTrailX)/2,
-                math.ceil((maxTrailY + minTrailY)/2))       
+        self:moveTo(minTrailX - math.floor(self.parentWidth/2),
+            minTrailY - math.floor(self.parentHeight/2))
         self:markDirty()
 
         -- printTable(self:getPosition())
@@ -88,12 +83,12 @@ end
 function PhosphorTrail:draw()
     for i=1, self.trailFrames - 1 do --no need to overdraw the actual sprite
         if self.visibilities[i] then
-            local alpha = (i/self.trailFrames) * 0.625 -- bit of rapid falloff
+            local alpha = (i/self.trailFrames) * 0.5 -- bit of rapid falloff
             gfx.setColor(gfx.kColorWhite)
             gfx.setDitherPattern(1 - alpha, gfx.image.kDitherTypeBayer4x4)
             local pos = self.positions[i]
-            gfx.fillRect((pos[1]-self.x) + math.ceil(self.width/2) - math.ceil(self.parentWidth/2),
-                (pos[2]-self.y) + math.ceil(self.height/2) - math.ceil(self.parentHeight/2),
+            gfx.fillRect((pos[1]-self.x) - math.ceil(self.parentWidth/2),
+                (pos[2]-self.y) - math.ceil(self.parentHeight/2),
                 self.parentWidth, self.parentHeight)
         end
     end
